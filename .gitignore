@@ -1,0 +1,30 @@
+# Secrets — never commit
+.env
+*.env
+backend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+venv/
+.venv/
+env/
+
+# Storage (optional: remove if you want to track memories.json)
+# storage/memories.json
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

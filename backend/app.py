@@ -1,19 +1,35 @@
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
-app = FastAPI()
+from flask import Flask, send_from_directory
+from flask_cors import CORS
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from routes.memories import memories_bp
+from routes.analyze import analyze_bp
 
-# Serve frontend (index.html, styles.css, main.js) from project/frontend
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
-app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
+app = Flask(__name__)
+CORS(app, supports_credentials=True)
+
+app.register_blueprint(memories_bp)
+app.register_blueprint(analyze_bp)
+
+ROOT = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = ROOT / "frontend"
+UPLOADS_DIR = ROOT / "uploads"
+
+
+@app.route("/")
+def index():
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.route("/uploads/<path:filename>")
+def uploads(filename):
+    return send_from_directory(UPLOADS_DIR, filename)
+
+
+@app.route("/<path:path>")
+def frontend_static(path):
+    return send_from_directory(FRONTEND_DIR, path)

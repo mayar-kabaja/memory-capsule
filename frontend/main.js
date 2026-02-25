@@ -1,8 +1,22 @@
-const API_KEY = 'YOUR_API_KEY_HERE'; // 🔑 Replace with your Anthropic API key
+const API_BASE = ''; // same origin when served by Flask
 
 let memories = [];
 let selectedMood = '';
 let currentPhoto = null;
+
+// Toast (replaces alert)
+function toast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type === 'error' ? ' toast-error' : '');
+  el.textContent = message;
+  container.appendChild(el);
+  const remove = () => {
+    el.classList.add('toast-out');
+    setTimeout(() => el.remove(), 320);
+  };
+  setTimeout(remove, 4000);
+}
 
 // Stars background
 const canvas = document.getElementById('stars-canvas');
@@ -98,35 +112,47 @@ function addMemory() {
   const date = document.getElementById('memDate').value.trim();
   const place = document.getElementById('memPlace').value.trim();
 
-  if (!title && !desc) { alert('Add a title or description ✦'); return; }
+  if (!title && !desc) { toast('Add a title or description ✦'); return; }
 
-  memories.push({
-    id: Date.now(),
-    title: title || 'Untitled memory',
-    desc,
-    date: date || '',
-    place: place || '',
-    mood: selectedMood || 'Nostalgic',
-    image: currentPhoto
-  });
-
-  // Reset
-  document.getElementById('memTitle').value = '';
-  document.getElementById('memDesc').value = '';
-  document.getElementById('memDate').value = '';
-  document.getElementById('memPlace').value = '';
-  document.getElementById('photoPreview').src = '';
-  document.getElementById('photoUpload').classList.remove('has-photo');
-  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-  selectedMood = '';
-  currentPhoto = null;
-
-  renderGrid();
+  fetch(`${API_BASE}/memories/add`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: title || 'Untitled memory',
+      desc,
+      date: date || '',
+      place: place || '',
+      mood: selectedMood || 'Nostalgic',
+      image: currentPhoto || null
+    })
+  })
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(() => {
+      document.getElementById('memTitle').value = '';
+      document.getElementById('memDesc').value = '';
+      document.getElementById('memDate').value = '';
+      document.getElementById('memPlace').value = '';
+      document.getElementById('photoPreview').src = '';
+      document.getElementById('photoUpload').classList.remove('has-photo');
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+      selectedMood = '';
+      currentPhoto = null;
+      loadMemories();
+    })
+    .catch(() => toast('Failed to save memory ✦', 'error'));
 }
 
 function deleteMemory(id) {
-  memories = memories.filter(m => m.id !== id);
-  renderGrid();
+  fetch(`${API_BASE}/memories/${id}`, { method: 'DELETE' })
+    .then(r => r.ok ? loadMemories() : Promise.reject())
+    .catch(() => toast('Failed to delete ✦', 'error'));
+}
+
+function loadMemories() {
+  fetch(`${API_BASE}/memories/all`)
+    .then(r => r.json())
+    .then(data => { memories = data; renderGrid(); })
+    .catch(() => { memories = []; renderGrid(); });
 }
 
 function renderGrid() {
@@ -142,7 +168,7 @@ function renderGrid() {
     <div class="mem-card" id="card-${m.id}">
       <button class="mem-delete" onclick="deleteMemory(${m.id})">✕</button>
       ${m.image
-        ? `<img class="mem-photo" src="${m.image}" alt="">`
+        ? `<img class="mem-photo" src="${m.image.startsWith('data:') ? m.image : (API_BASE || '') + m.image}" alt="">`
         : `<div class="mem-photo-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
       }
       <div class="mem-body">
@@ -154,65 +180,45 @@ function renderGrid() {
   `).join('');
 }
 
-// Demo data
+// Demo data — add via API
 function loadDemoData() {
-  memories = [
-    { id: 1, title: "Sunrise at the sea", desc: "Woke up before anyone else and watched the sun rise over the water. Dad was there, quiet, just us two.", date: "Summer 2018", place: "Latakia coast", mood: "Peaceful", image: null },
-    { id: 2, title: "Graduation day", desc: "Everyone was proud. Mom was crying. I remember the feeling of finally being done.", date: "June 2022", place: "University, Nablus", mood: "Joyful", image: null },
-    { id: 3, title: "Road trip through the north", desc: "Just friends, an old car, no plan. We got lost three times and laughed the entire way.", date: "Spring 2021", place: "Northern roads", mood: "Adventurous", image: null },
-    { id: 4, title: "Ramadan nights with family", desc: "After iftar, everyone gathered. My grandmother told old stories. The whole house smelled like coffee.", date: "Ramadan 2019", place: "Grandma's house", mood: "Loving", image: null },
-    { id: 5, title: "First time I built something real", desc: "Stayed up until 4am finishing a project. When it finally worked, I sat alone in the dark and smiled.", date: "Late 2023", place: "Home", mood: "Joyful", image: null },
-    { id: 6, title: "A quiet afternoon that mattered", desc: "Nothing happened. I was reading by the window. But I remember feeling completely at peace.", date: "Winter 2020", place: "My room", mood: "Nostalgic", image: null },
+  const demo = [
+    { title: "Sunrise at the sea", desc: "Woke up before anyone else and watched the sun rise over the water. Dad was there, quiet, just us two.", date: "Summer 2018", place: "Latakia coast", mood: "Peaceful", image: null },
+    { title: "Graduation day", desc: "Everyone was proud. Mom was crying. I remember the feeling of finally being done.", date: "June 2022", place: "University, Nablus", mood: "Joyful", image: null },
+    { title: "Road trip through the north", desc: "Just friends, an old car, no plan. We got lost three times and laughed the entire way.", date: "Spring 2021", place: "Northern roads", mood: "Adventurous", image: null },
+    { title: "Ramadan nights with family", desc: "After iftar, everyone gathered. My grandmother told old stories. The whole house smelled like coffee.", date: "Ramadan 2019", place: "Grandma's house", mood: "Loving", image: null },
+    { title: "First time I built something real", desc: "Stayed up until 4am finishing a project. When it finally worked, I sat alone in the dark and smiled.", date: "Late 2023", place: "Home", mood: "Joyful", image: null },
+    { title: "A quiet afternoon that mattered", desc: "Nothing happened. I was reading by the window. But I remember feeling completely at peace.", date: "Winter 2020", place: "My room", mood: "Nostalgic", image: null },
   ];
-  renderGrid();
-  document.querySelector('.demo-btn').textContent = '✓ Demo memories loaded';
+  let done = 0;
+  demo.forEach(m => {
+    fetch(`${API_BASE}/memories/add`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(m)
+    }).then(r => { if (r.ok) { done++; if (done === demo.length) { loadMemories(); document.querySelector('.demo-btn').textContent = '✓ Demo memories loaded'; } } });
+  });
 }
 
 async function discoverPattern() {
   if (memories.length < 2) {
-    alert('Add at least 2 memories first ✦');
+    toast('Add at least 2 memories first ✦');
     return;
   }
 
   document.getElementById('loadingState').classList.add('visible');
   document.getElementById('insightsOutput').classList.remove('visible');
 
-  const memoriesText = memories.map((m, i) =>
-    `Memory ${i+1}: "${m.title}" | Where: ${m.place || 'unknown'} | When: ${m.date || 'unknown'} | Mood: ${m.mood} | Description: ${m.desc}`
-  ).join('\n');
-
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You analyze a person's saved memories and find deep emotional patterns. 
-Return ONLY a valid JSON object — no markdown, no backticks, no explanation:
-{
-  "insights": [
-    { "icon": "emoji", "label": "short label", "value": "1-2 sentence insight" },
-    { "icon": "emoji", "label": "short label", "value": "1-2 sentence insight" },
-    { "icon": "emoji", "label": "short label", "value": "1-2 sentence insight" },
-    { "icon": "emoji", "label": "short label", "value": "1-2 sentence insight" }
-  ],
-  "bigPicture": "2-3 sentences about the overall pattern. What truly brings this person happiness? Be specific, emotional, insightful.",
-  "message": "A warm, personal message to this person based on their memories. Like a letter from someone who knows them deeply. 2-3 sentences. Make it feel like a gentle revelation."
-}`,
-        messages: [{ role: 'user', content: `Here are my memories:\n${memoriesText}\n\nAnalyze my patterns.` }]
-      })
-    });
-
+    const response = await fetch(`${API_BASE}/analyze`, { method: 'POST' });
     const data = await response.json();
-    const raw = data.content.map(i => i.text || '').join('');
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-    displayInsights(parsed);
-
+    if (!response.ok) {
+      toast(data.error || 'Analysis failed ✦', 'error');
+      return;
+    }
+    displayInsights(data);
   } catch (err) {
     console.error(err);
-    // Demo fallback
     displayInsights({
       insights: [
         { icon: "🌊", label: "Where you feel free", value: "Most of your happiest moments happen near water or open spaces — the sea, the road, a window. You need openness to feel alive." },
@@ -245,3 +251,5 @@ function displayInsights(data) {
     document.getElementById('insightsOutput').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
 }
+
+loadMemories();
