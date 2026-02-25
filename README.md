@@ -43,8 +43,16 @@ Deploy the **entire project** (frontend + API) as one Web Service on [Render](ht
 
 1. **New** → **Web Service**; connect your GitHub repo.
 2. **Runtime**: Python.
-3. **Build command**: `pip install -r backend/requirements.txt`
-4. **Start command**: `gunicorn backend.app:app --bind 0.0.0.0:$PORT`
+3. **Build command** (you can leave Render’s default or set explicitly):
+   ```bash
+   pip install -r requirements.txt
+   ```
+   (Root `requirements.txt` installs from `backend/requirements.txt`.)
+4. **Start command** (required — replace Render’s placeholder):
+   ```bash
+   gunicorn backend.app:app --bind 0.0.0.0:$PORT
+   ```
+   Do **not** use `gunicorn your_application.wsgi`; this app is `backend.app:app`.
 5. **Environment**: add `GROQ_API_KEY` with your Groq API key.
 6. Deploy.
 

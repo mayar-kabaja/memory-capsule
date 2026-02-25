@@ -1,0 +1,3 @@
+# Render default build runs: pip install -r requirements.txt
+# This file redirects to the real requirements.
+-r backend/requirements.txt
