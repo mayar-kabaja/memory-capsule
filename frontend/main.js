@@ -165,8 +165,8 @@ function renderGrid() {
   }
 
   grid.innerHTML = memories.map(m => `
-    <div class="mem-card" id="card-${m.id}">
-      <button class="mem-delete" onclick="deleteMemory(${m.id})">✕</button>
+    <div class="mem-card" id="card-${m.id}" onclick="openMemory(${m.id})" style="cursor:pointer;">
+      <button class="mem-delete" onclick="event.stopPropagation(); deleteMemory(${m.id});">✕</button>
       ${m.image
         ? `<img class="mem-photo" src="${m.image.startsWith('data:') ? m.image : (API_BASE || '') + m.image}" alt="">`
         : `<div class="mem-photo-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
@@ -250,6 +250,90 @@ function displayInsights(data) {
   setTimeout(() => {
     document.getElementById('insightsOutput').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
+}
+
+// ── Memory detail overlay ─────────────────────────────────────────
+function openMemory(id) {
+  const m = memories.find(x => x.id === id);
+  if (!m) return;
+
+  const photoWrap = document.getElementById('overlayPhotoWrap');
+  if (m.image) {
+    const src = m.image.startsWith('data:') ? m.image : (API_BASE || '') + m.image;
+    photoWrap.innerHTML = `<img class="overlay-photo" src="${src}" alt="">`;
+  } else {
+    photoWrap.innerHTML = `<div class="overlay-photo-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`;
+  }
+
+  document.getElementById('overlayMeta').textContent = [m.date, m.place].filter(Boolean).join(' · ') || 'A moment in time';
+  document.getElementById('overlayTitle').textContent = m.title;
+  document.getElementById('overlayDesc').textContent = m.desc || 'No description added.';
+  document.getElementById('overlayMood').textContent = m.mood;
+
+  document.getElementById('overlayDeleteBtn').onclick = () => {
+    deleteMemory(id);
+    closeOverlay();
+  };
+
+  document.getElementById('overlayAiBox').innerHTML = `
+    <div class="overlay-ai-loading">
+      <div class="orb" style="animation-delay:0s"></div>
+      <div class="orb" style="animation-delay:0.25s"></div>
+      <div class="orb" style="animation-delay:0.5s"></div>
+      <span>Reading your memory…</span>
+    </div>`;
+
+  document.getElementById('memOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  analyzeOneMemory(m);
+}
+
+function closeOverlay() {
+  document.getElementById('memOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay(); });
+
+async function analyzeOneMemory(m) {
+  try {
+    const response = await fetch(`${API_BASE}/analyze/one`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memory: m })
+    });
+    const data = await response.json();
+    if (data.insight) {
+      showAiInsight(data.insight);
+    } else {
+      showAiInsightFallback(m.mood);
+    }
+  } catch (err) {
+    showAiInsightFallback(m.mood);
+  }
+}
+
+function showAiInsight(text) {
+  document.getElementById('overlayAiBox').innerHTML = `<div class="overlay-ai-text">${escapeHtml(text)}</div>`;
+}
+
+function showAiInsightFallback(mood) {
+  const fallbacks = {
+    Peaceful: "There's something about stillness that you seek — and this memory is proof you know how to find it. You didn't need anything extraordinary. Just the right moment, and you were completely present.",
+    Joyful: "Joy like this doesn't happen by accident. You were exactly where you needed to be, with exactly the right people. This memory is a map back to your happiest self.",
+    Nostalgic: "This memory lives in you because part of you knows that moment was rare. You felt it even then — that quiet awareness that something beautiful was happening.",
+    Bittersweet: "The most meaningful memories often carry both joy and ache. This one stayed with you because it mattered — deeply, truly, in a way that changed something in you.",
+    Adventurous: "You were fully alive in this memory. No hesitation, no plan — just you and the moment. This is the version of yourself you return to when you need courage.",
+    Loving: "Love like this is the kind that leaves a mark. This memory isn't just about the people in it — it's about who you become when you're surrounded by them."
+  };
+  showAiInsight(fallbacks[mood] || fallbacks.Nostalgic);
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
 }
 
 loadMemories();

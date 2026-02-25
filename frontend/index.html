@@ -126,6 +126,34 @@
 
 </div>
 
+<!-- Memory detail overlay -->
+<div class="overlay" id="memOverlay">
+  <div class="overlay-backdrop" onclick="closeOverlay()"></div>
+  <div class="overlay-panel" id="overlayPanel">
+    <button class="overlay-close" onclick="closeOverlay()" aria-label="Close">✕</button>
+    <div id="overlayPhotoWrap"></div>
+    <div class="overlay-body">
+      <div class="overlay-meta" id="overlayMeta"></div>
+      <div class="overlay-title" id="overlayTitle"></div>
+      <div class="overlay-desc" id="overlayDesc"></div>
+      <div class="overlay-mood" id="overlayMood"></div>
+      <div class="overlay-divider"></div>
+      <div class="overlay-ai-label">✦ &nbsp; What AI sees in this memory</div>
+      <div class="overlay-ai-box" id="overlayAiBox">
+        <div class="overlay-ai-loading">
+          <div class="orb" style="animation-delay:0s"></div>
+          <div class="orb" style="animation-delay:0.25s"></div>
+          <div class="orb" style="animation-delay:0.5s"></div>
+          <span>Reading your memory…</span>
+        </div>
+      </div>
+      <div class="overlay-footer">
+        <button type="button" class="overlay-delete" id="overlayDeleteBtn">Delete memory</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
 <script src="main.js"></script>
