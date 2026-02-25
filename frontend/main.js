@@ -336,4 +336,19 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
+// Share links — use current origin so it works locally and on any deploy
+const SHARE_URL = typeof window !== 'undefined' ? window.location.origin + '/' : 'https://memory-capsule-rkgi.onrender.com/';
+const SHARE_TEXT = 'Memory Capsule — Find your pattern. Save memories, let AI show you what truly makes you happy.';
+
+function setupShareLinks() {
+  document.getElementById('shareTwitter').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(SHARE_URL)}&text=${encodeURIComponent(SHARE_TEXT)}`;
+  document.getElementById('shareFacebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_URL)}`;
+  document.getElementById('shareLinkedIn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SHARE_URL)}`;
+  document.getElementById('shareWhatsApp').href = `https://wa.me/?text=${encodeURIComponent(SHARE_TEXT + ' ' + SHARE_URL)}`;
+  document.getElementById('shareCopy').addEventListener('click', () => {
+    navigator.clipboard.writeText(SHARE_URL).then(() => toast('Link copied ✦')).catch(() => toast('Could not copy ✦', 'error'));
+  });
+}
+setupShareLinks();
+
 loadMemories();

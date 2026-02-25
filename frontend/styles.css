@@ -837,6 +837,59 @@ select option { background: var(--surface2); }
 
 .demo-btn:hover { color: var(--gold); border-color: rgba(200,169,110,0.3); }
 
+/* Share section */
+.share-section {
+  text-align: center;
+  padding: 48px 24px 60px;
+  margin-top: 24px;
+  animation: fadeIn 1s ease 0.6s both;
+}
+.share-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.share-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.share-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-family: 'Lato', sans-serif;
+}
+.share-btn:hover {
+  border-color: rgba(200,169,110,0.4);
+  color: var(--gold);
+  background: var(--gold-dim);
+}
+.share-twitter:hover { border-color: #1da1f2; color: #1da1f2; background: rgba(29,161,242,0.1); }
+.share-facebook:hover { border-color: #1877f2; color: #1877f2; background: rgba(24,119,242,0.1); }
+.share-linkedin:hover { border-color: #0a66c2; color: #0a66c2; background: rgba(10,102,194,0.1); }
+.share-whatsapp:hover { border-color: #25d366; color: #25d366; background: rgba(37,211,102,0.1); }
+.share-copy:hover { border-color: var(--gold); color: var(--gold); }
+
 @media (max-width: 620px) {
   .upload-row { grid-template-columns: 1fr; }
   .photo-upload { width: 100%; }
