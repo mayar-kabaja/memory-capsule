@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": 1,
+    "title": "new job",
+    "desc": "i apply for fullstack job and i accepted",
+    "date": "26/1/2026",
+    "place": "gaza",
+    "mood": "Peaceful",
+    "image": "/uploads/1.png"
+  },
+  {
+    "id": 2,
+    "title": "love app",
+    "desc": "i do the loove app for my boyfriend",
+    "date": "2/2/2026",
+    "place": "homw",
+    "mood": "Loving",
+    "image": "/uploads/2.jpg"
+  }
+]

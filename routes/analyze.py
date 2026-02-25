@@ -3,7 +3,7 @@ import json
 import os
 
 from flask import Blueprint, current_app, jsonify
-from anthropic import Anthropic
+from groq import Groq
 
 # Project root
 ROOT = Path(__file__).resolve().parent.parent
@@ -12,6 +12,8 @@ STORAGE_FILE = ROOT / "storage" / "memories.json"
 analyze_bp = Blueprint("analyze", __name__, url_prefix="/analyze")
 
 SYSTEM_PROMPT = """You analyze a person's saved memories and find deep emotional patterns.
+Answer ONE question: "What pattern do you see in this person's happiest moments?"
+
 Return ONLY a valid JSON object — no markdown, no backticks, no explanation:
 {
   "insights": [
@@ -20,7 +22,7 @@ Return ONLY a valid JSON object — no markdown, no backticks, no explanation:
     { "icon": "emoji", "label": "short label", "value": "1-2 sentence insight" },
     { "icon": "emoji", "label": "short label", "value": "1-2 sentence insight" }
   ],
-  "bigPicture": "2-3 sentences about the overall pattern. What truly brings this person happiness? Be specific, emotional, insightful.",
+  "bigPicture": "2-3 sentences about the overall pattern. What truly brings this person happiness? Be specific, emotional, insightful. Surface patterns a human would not easily see (e.g. '7 of 10 memories involve family', 'you feel happiest in quiet moments, not celebrations', 'water appears in most peaceful memories').",
   "message": "A warm, personal message to this person based on their memories. Like a letter from someone who knows them deeply. 2-3 sentences. Make it feel like a gentle revelation."
 }"""
 
@@ -39,39 +41,48 @@ FALLBACK = {
 def _load_memories():
     if not STORAGE_FILE.exists():
         return []
-    with open(STORAGE_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(STORAGE_FILE, "r", encoding="utf-8") as f:
+            data = f.read()
+        if not data.strip():
+            return []
+        return json.loads(data)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return []
 
 
 @analyze_bp.route("", methods=["POST"])
 def analyze():
-    """POST /analyze — send all memories to Anthropic and return insights."""
+    """POST /analyze — send ALL memories to Groq, get pattern analysis, return insights."""
     memories = _load_memories()
     if len(memories) < 2:
         return jsonify({"error": "Add at least 2 memories first"}), 400
 
     memories_text = "\n".join(
-        f'Memory {i+1}: "{m.get("title", "")}" | Where: {m.get("place") or "unknown"} | When: {m.get("date") or "unknown"} | Mood: {m.get("mood", "")} | Description: {m.get("desc", "")}'
+        f'Memory {i+1}: "{m.get("title", "")}" | {m.get("mood", "")} | {m.get("place") or "unknown"} | {m.get("date") or "unknown"} | {m.get("desc", "")}'
         for i, m in enumerate(memories)
     )
-    user_content = f"Here are my memories:\n{memories_text}\n\nAnalyze my patterns."
+    user_content = f"Here are my memories:\n{memories_text}\n\nAnalyze my patterns. What do you see?"
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
-    if not api_key or api_key == "your_key_here":
+    api_key = os.environ.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+    if not api_key or api_key.strip() in ("", "your_key_here"):
         return jsonify(FALLBACK)
 
     try:
-        client = Anthropic(api_key=api_key)
-        resp = client.messages.create(
-            model="claude-sonnet-4-20250514",
+        client = Groq(api_key=api_key)
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
             max_tokens=1000,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_content}],
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_content},
+            ],
         )
-        raw = "".join(block.text for block in resp.content if hasattr(block, "text"))
+        raw = resp.choices[0].message.content or ""
         clean = raw.replace("```json", "").replace("```", "").strip()
         data = json.loads(clean)
         return jsonify(data)
     except Exception as e:
-        current_app.logger.warning("Anthropic request failed: %s", e)
+        current_app.logger.warning("Groq request failed: %s", e)
         return jsonify(FALLBACK)
