@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Capsule — Find Your Pattern</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<nav>
+  <div class="nav-logo">Memory Capsule</div>
+  <div class="nav-count"><span id="memCount">0</span> memories saved</div>
+</nav>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">✦ &nbsp; Your life has a pattern &nbsp; ✦</div>
+    <h1>What do your<br><em>best moments</em> have<br>in common?</h1>
+    <p>Save your memories. Let AI connect the dots — and show you who you truly are.</p>
+  </div>
+
+  <!-- Add Memory -->
+  <div class="add-card">
+    <div class="card-title">Add a Memory</div>
+
+    <div class="upload-row">
+      <label for="photoIn">
+        <div class="photo-upload" id="photoUpload">
+          <div class="ph-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <p>Add photo</p>
+          </div>
+          <img id="photoPreview" alt="">
+        </div>
+      </label>
+      <input type="file" id="photoIn" accept="image/*">
+
+      <div class="fields-col">
+        <input type="text" id="memTitle" placeholder="Give this memory a name…">
+        <textarea id="memDesc" placeholder="Describe it — what do you remember most?"></textarea>
+        <div class="input-row">
+          <input type="text" id="memDate" placeholder="When? (e.g. Summer 2019)">
+          <input type="text" id="memPlace" placeholder="Where?">
+        </div>
+      </div>
+    </div>
+
+    <div class="mood-label">How did it feel?</div>
+    <div class="mood-selector" id="moodSelector">
+      <button class="mood-btn" data-mood="Nostalgic">Nostalgic</button>
+      <button class="mood-btn" data-mood="Joyful">Joyful</button>
+      <button class="mood-btn" data-mood="Bittersweet">Bittersweet</button>
+      <button class="mood-btn" data-mood="Peaceful">Peaceful</button>
+      <button class="mood-btn" data-mood="Adventurous">Adventurous</button>
+      <button class="mood-btn" data-mood="Loving">Loving</button>
+    </div>
+
+    <button class="btn-add" onclick="addMemory()">+ Save this memory</button>
+  </div>
+
+  <!-- Saved Memories -->
+  <div class="section-header">
+    <h2>Your Memories</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="memories-grid" id="memoriesGrid">
+    <div class="empty-grid">No memories yet — add your first one above</div>
+  </div>
+
+  <!-- Discover Pattern -->
+  <div class="discover-section">
+    <div class="discover-card">
+      <div class="constellation" id="constellation"></div>
+      <div class="discover-title">Discover Your Pattern</div>
+      <div class="discover-desc">Once you've saved a few memories, AI will analyze them all and reveal what truly makes you happy — the places, people, and moments that define you.</div>
+
+      <button class="demo-btn" onclick="loadDemoData()">✦ Load demo memories to try</button>
+
+      <button class="btn-discover" onclick="discoverPattern()">
+        <span>✦ &nbsp; Find my pattern &nbsp; ✦</span>
+      </button>
+      <div class="min-notice">Works best with 3+ memories</div>
+
+      <div class="loading-state" id="loadingState">
+        <div class="loading-orbs">
+          <div class="orb"></div>
+          <div class="orb"></div>
+          <div class="orb"></div>
+        </div>
+        <div class="loading-text">Reading your memories…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insights Output -->
+  <div class="insights-output" id="insightsOutput">
+    <div class="insights-header">
+      <div class="eyebrow">AI Pattern Analysis</div>
+      <h2>Here's what your memories reveal</h2>
+    </div>
+
+    <div class="insights-grid" id="insightsGrid"></div>
+
+    <div class="big-insight" id="bigInsight">
+      <div class="big-insight-label">The Big Picture</div>
+      <div class="big-insight-text" id="bigInsightText"></div>
+    </div>
+
+    <div class="ai-message" id="aiMessage">
+      <div class="ai-message-label">A message for you</div>
+      <div class="ai-message-text" id="aiMessageText"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
