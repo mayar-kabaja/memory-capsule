@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent / ".env")
@@ -16,8 +17,12 @@ app.register_blueprint(memories_bp)
 app.register_blueprint(analyze_bp)
 
 ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = Path(os.environ.get("DATA_DIR", str(ROOT)))
 FRONTEND_DIR = ROOT / "frontend"
-UPLOADS_DIR = ROOT / "uploads"
+UPLOADS_DIR = DATA_DIR / "uploads"
+# Ensure data dirs exist (e.g. on Render with persistent disk)
+(DATA_DIR / "storage").mkdir(parents=True, exist_ok=True)
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @app.route("/")

@@ -1,0 +1,18 @@
+# Render Blueprint — deploy the whole app as one Web Service
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: memory-capsule
+    runtime: python
+
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn backend.app:app --bind 0.0.0.0:$PORT
+
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      # Optional: mount a persistent disk at /data and set DATA_DIR=/data
+      # so memories and uploads survive deploys/restarts
+      # - key: DATA_DIR
+      #   value: /data

@@ -1,12 +1,14 @@
 from pathlib import Path
 import json
 import base64
+import os
 import threading
 
 from flask import Blueprint, request, jsonify
 
-# Project root (parent of routes/)
-ROOT = Path(__file__).resolve().parent.parent
+# Project root (or Render persistent disk path from env)
+_repo_root = Path(__file__).resolve().parent.parent
+ROOT = Path(os.environ.get("DATA_DIR", str(_repo_root)))
 STORAGE_FILE = ROOT / "storage" / "memories.json"
 UPLOADS_DIR = ROOT / "uploads"
 

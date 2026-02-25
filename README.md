@@ -24,3 +24,31 @@ flask --app backend.app run
 ```
 
 Then open http://127.0.0.1:5000
+
+---
+
+## Deploy on Render
+
+Deploy the **entire project** (frontend + API) as one Web Service on [Render](https://render.com).
+
+### One-click (Blueprint)
+
+1. Push this repo to GitHub.
+2. In [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**.
+3. Connect the repo; Render will read `render.yaml`.
+4. Add env var **GROQ_API_KEY** (Dashboard → your service → Environment).
+5. Deploy. Your app will be at `https://memory-capsule-xxxx.onrender.com`.
+
+### Manual
+
+1. **New** → **Web Service**; connect your GitHub repo.
+2. **Runtime**: Python.
+3. **Build command**: `pip install -r backend/requirements.txt`
+4. **Start command**: `gunicorn backend.app:app --bind 0.0.0.0:$PORT`
+5. **Environment**: add `GROQ_API_KEY` with your Groq API key.
+6. Deploy.
+
+### Notes
+
+- **Root directory** stays empty so the repo root is used (backend, routes, frontend, storage, uploads all live there).
+- On the free tier, the filesystem is **ephemeral**: memories and uploads are lost on deploy or restart. For persistence, use a **persistent disk**: add a disk in Render, mount it at `/data`, and set env var `DATA_DIR=/data` (see optional support in the app).

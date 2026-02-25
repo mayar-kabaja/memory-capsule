@@ -5,8 +5,9 @@ import os
 from flask import Blueprint, current_app, jsonify
 from groq import Groq
 
-# Project root
-ROOT = Path(__file__).resolve().parent.parent
+# Project root (or Render persistent disk path from env)
+_repo_root = Path(__file__).resolve().parent.parent
+ROOT = Path(os.environ.get("DATA_DIR", str(_repo_root)))
 STORAGE_FILE = ROOT / "storage" / "memories.json"
 
 analyze_bp = Blueprint("analyze", __name__, url_prefix="/analyze")
