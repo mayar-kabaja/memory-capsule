@@ -28,15 +28,25 @@
 </head>
 <body>
 
-<!-- Shown until app is ready; hides when JS runs or after timeout (handles cold start) -->
-<div id="app-loading" class="app-loading">
-  <div class="app-loading-inner">
-    <div class="app-loading-logo">Memory Capsule</div>
-    <div class="app-loading-spinner"></div>
-    <p class="app-loading-text">Loading…</p>
-    <p class="app-loading-hint">If this is your first visit, the server may take up to a minute to start.</p>
+<!-- Loading screen: inline styles so it shows even before styles.css loads -->
+<div id="app-loading" class="app-loading" style="position:fixed;inset:0;z-index:10000;background:#080c14;display:flex;align-items:center;justify-content:center;color:#e8e0d5;font-family:sans-serif;">
+  <div style="text-align:center;padding:40px;">
+    <div style="font-size:1.5rem;color:#c8a96e;margin-bottom:24px;font-style:italic;">Memory Capsule</div>
+    <div style="width:40px;height:40px;margin:0 auto 20px;border:2px solid rgba(255,255,255,0.1);border-top-color:#c8a96e;border-radius:50%;animation:spin 0.9s linear infinite;"></div>
+    <p style="font-size:0.95rem;color:rgba(232,224,213,0.6);margin-bottom:8px;" id="loading-msg">Loading…</p>
+    <p style="font-size:0.8rem;color:rgba(232,224,213,0.5);max-width:300px;margin:0 auto;line-height:1.5;" id="loading-hint">If this is your first visit, the server may take up to a minute to start.</p>
   </div>
 </div>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+<script>
+(function(){
+  var msg=document.getElementById('loading-msg');
+  var hint=document.getElementById('loading-hint');
+  if(!msg)return;
+  setTimeout(function(){ if(hint) hint.textContent='The server is waking up (free tier). Wait about 1 minute, then refresh this page.'; }, 15000);
+  setTimeout(function(){ if(hint) hint.textContent='Still waiting? Refresh the page now — the server should be ready.'; }, 45000);
+})();
+</script>
 
 <canvas id="stars-canvas"></canvas>
 

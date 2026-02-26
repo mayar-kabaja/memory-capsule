@@ -60,4 +60,5 @@ Deploy the **entire project** (frontend + API) as one Web Service on [Render](ht
 
 - **Root directory** stays empty so the repo root is used (backend, routes, frontend, storage, uploads all live there).
 - **First load can take 30–60 seconds** on Render’s free tier (server “cold start”). A loading screen explains this; if it stays blank, wait and refresh once.
+- **If you see nothing at all** (blank tab, no “Loading…”): the server may not be responding yet. Try opening `https://your-app.onrender.com/health` in a new tab — if you get `{"status":"ok"}` after a while, the server is up; then refresh the main page. Check the [Render Dashboard](https://dashboard.render.com) for deploy status and logs.
 - On the free tier, the filesystem is **ephemeral**: memories and uploads are lost on deploy or restart. For persistence, use a **persistent disk**: add a disk in Render, mount it at `/data`, and set env var `DATA_DIR=/data` (see optional support in the app).

@@ -30,6 +30,11 @@ def index():
     return send_from_directory(FRONTEND_DIR, "index.html")
 
 
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
+
 @app.route("/uploads/<path:filename>")
 def uploads(filename):
     return send_from_directory(UPLOADS_DIR, filename)
