@@ -1,65 +1,20 @@
 [
   {
-    "id": 2,
-    "title": "love app",
-    "desc": "i do the loove app for my boyfriend",
-    "date": "2/2/2026",
-    "place": "homw",
-    "mood": "Loving",
-    "image": "/uploads/2.jpg"
-  },
-  {
-    "id": 3,
+    "id": 1,
     "title": "Sunrise at the sea",
-    "desc": "Woke up before anyone else and watched the sun rise over the water. Dad was there, quiet, just us two.",
-    "date": "Summer 2018",
-    "place": "Latakia coast",
-    "mood": "Peaceful",
-    "image": null
-  },
-  {
-    "id": 4,
-    "title": "Graduation day",
-    "desc": "Everyone was proud. Mom was crying. I remember the feeling of finally being done.",
-    "date": "June 2022",
-    "place": "University, Nablus",
-    "mood": "Joyful",
-    "image": null
-  },
-  {
-    "id": 5,
-    "title": "Road trip through the north",
-    "desc": "Just friends, an old car, no plan. We got lost three times and laughed the entire way.",
-    "date": "Spring 2021",
-    "place": "Northern roads",
-    "mood": "Adventurous",
-    "image": null
-  },
-  {
-    "id": 6,
-    "title": "First time I built something real",
-    "desc": "Stayed up until 4am finishing a project. When it finally worked, I sat alone in the dark and smiled.",
-    "date": "Late 2023",
-    "place": "Home",
-    "mood": "Joyful",
-    "image": null
-  },
-  {
-    "id": 7,
-    "title": "Ramadan nights with family",
-    "desc": "After iftar, everyone gathered. My grandmother told old stories. The whole house smelled like coffee.",
-    "date": "Ramadan 2019",
-    "place": "Grandma's house",
+    "desc": "Two silhouettes watching the sun rise over water — warm orange sky",
+    "date": "1/1/206",
+    "place": "gaza",
     "mood": "Loving",
-    "image": null
+    "image": "/uploads/1.jpg"
   },
   {
-    "id": 8,
-    "title": "A quiet afternoon that mattered",
-    "desc": "Nothing happened. I was reading by the window. But I remember feeling completely at peace.",
-    "date": "Winter 2020",
-    "place": "My room",
-    "mood": "Nostalgic",
-    "image": null
+    "id": 2,
+    "title": "Road trip",
+    "desc": "Mountain road at golden hour with a car in the distance",
+    "date": "1/2/2026",
+    "place": "rafah",
+    "mood": "Adventurous",
+    "image": "/uploads/2.jpg"
   }
 ]

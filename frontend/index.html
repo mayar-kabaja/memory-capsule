@@ -28,6 +28,16 @@
 </head>
 <body>
 
+<!-- Shown until app is ready; hides when JS runs or after timeout (handles cold start) -->
+<div id="app-loading" class="app-loading">
+  <div class="app-loading-inner">
+    <div class="app-loading-logo">Memory Capsule</div>
+    <div class="app-loading-spinner"></div>
+    <p class="app-loading-text">Loading…</p>
+    <p class="app-loading-hint">If this is your first visit, the server may take up to a minute to start.</p>
+  </div>
+</div>
+
 <canvas id="stars-canvas"></canvas>
 
 <nav>

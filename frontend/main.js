@@ -20,10 +20,11 @@ function toast(message, type = 'info') {
 
 // Stars background
 const canvas = document.getElementById('stars-canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 let stars = [];
 
 function initStars() {
+  if (!canvas || !ctx) return;
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   stars = Array.from({ length: 160 }, () => ({
@@ -37,6 +38,7 @@ function initStars() {
 }
 
 function drawStars() {
+  if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   stars.forEach(s => {
     s.phase += s.speed;
@@ -50,12 +52,15 @@ function drawStars() {
 }
 
 window.addEventListener('resize', initStars);
-initStars();
-drawStars();
+if (canvas) {
+  initStars();
+  drawStars();
+}
 
 // Constellation animation
 function animateConstellation() {
   const c = document.getElementById('constellation');
+  if (!c) return;
   c.innerHTML = '';
   const points = [
     [20, 70], [70, 20], [130, 55], [180, 15], [220, 60], [170, 80], [100, 75]
@@ -81,20 +86,28 @@ function animateConstellation() {
   });
 }
 
-animateConstellation();
-setInterval(animateConstellation, 5000);
+const constellationEl = document.getElementById('constellation');
+if (constellationEl) {
+  animateConstellation();
+  setInterval(animateConstellation, 5000);
+}
 
 // Mood selector
-document.getElementById('moodSelector').addEventListener('click', e => {
-  if (e.target.classList.contains('mood-btn')) {
-    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    selectedMood = e.target.dataset.mood;
-  }
-});
+const moodSelector = document.getElementById('moodSelector');
+if (moodSelector) {
+  moodSelector.addEventListener('click', e => {
+    if (e.target.classList.contains('mood-btn')) {
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      selectedMood = e.target.dataset.mood;
+    }
+  });
+}
 
 // Photo upload
-document.getElementById('photoIn').addEventListener('change', function(e) {
+const photoIn = document.getElementById('photoIn');
+if (photoIn) {
+  photoIn.addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -104,7 +117,8 @@ document.getElementById('photoIn').addEventListener('change', function(e) {
     document.getElementById('photoUpload').classList.add('has-photo');
   };
   reader.readAsDataURL(file);
-});
+  });
+}
 
 function addMemory() {
   const title = document.getElementById('memTitle').value.trim();
@@ -149,10 +163,26 @@ function deleteMemory(id) {
 }
 
 function loadMemories() {
-  fetch(`${API_BASE}/memories/all`)
+  const loadingEl = document.getElementById('app-loading');
+  const COLD_START_TIMEOUT = 25000; // 25s for Render cold start
+
+  const hideLoading = () => {
+    if (loadingEl) loadingEl.classList.add('hidden');
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+    hideLoading();
+    memories = [];
+    renderGrid();
+    if (loadingEl) toast('Server may be waking up (free tier). Refresh in a moment if the page is empty.');
+  }, COLD_START_TIMEOUT);
+
+  fetch(`${API_BASE}/memories/all`, { signal: controller.signal })
     .then(r => r.json())
-    .then(data => { memories = data; renderGrid(); })
-    .catch(() => { memories = []; renderGrid(); });
+    .then(data => { clearTimeout(timeoutId); memories = data; renderGrid(); hideLoading(); })
+    .catch(() => { clearTimeout(timeoutId); memories = []; renderGrid(); hideLoading(); });
 }
 
 function renderGrid() {
@@ -352,3 +382,9 @@ function setupShareLinks() {
 setupShareLinks();
 
 loadMemories();
+
+// If loading overlay is still visible after 60s (e.g. server never responded), hide it
+setTimeout(() => {
+  const el = document.getElementById('app-loading');
+  if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
+}, 60000);
